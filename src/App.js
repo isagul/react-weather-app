@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import './App.scss';
 import Downshift from 'downshift';
 import TextField from '@material-ui/core/TextField';
@@ -11,24 +11,33 @@ function App() {
   const [cityWeather, setCityWeather] = useState({});
   let selectedCity = '';
 
-
-  // Similar to componentDidMount and componentDidUpdate:
-  useEffect(() => {
-    
-
-
-    /*return () => {
-      console.log('unmounting');
-    }*/
-  },[cityWeather]);
-
-  function convertKelvinToCelcius(kelvin){
+  const convertKelvinToCelcius = kelvin => {
     return `${Math.round(kelvin - 273.15)} ${String.fromCharCode(176)}C`;    
+  }
+
+  const convertUTCtoDate = utc => {
+    let date = new Date(utc * 1000);
+    let hour = '';
+    let minutes = '';
+    if (String(date.getHours()).length === 1) {
+      hour = `0${date.getHours()}`;
+    } else {
+      hour = `${date.getHours()}`;
+    }
+    if (String(date.getMinutes()).length === 1) {
+      minutes = `${date.getMinutes()}0`;
+    } else {
+      minutes = `${date.getMinutes()}`;
+    }
+    return `${hour}:${minutes}`;
   }
  
   return (
     <div className="App">
-      <h1>Weather Extension</h1>
+      <div className="app-title">
+        <img src={require('./assets/weather-icon.png')} alt="weather-icon"/>
+        <h1>Weather Extension</h1>
+      </div>      
       <Downshift
         onChange={selection => {
           selectedCity = selection.name
@@ -90,12 +99,43 @@ function App() {
           )}
       </Downshift>
       {
-        Object.keys(cityWeather).length > 0 && 
-        <div className="weather-situation">
-          <h2>Today</h2>
-          <p>{convertKelvinToCelcius(cityWeather.main.temp)}</p>
-          <p>{cityWeather.weather[0].main}</p>
-          <p>{cityWeather.weather[0].description}</p>
+        Object.keys(cityWeather).length > 0 &&
+        <div className="weather-info">
+          <div className="weather-main">
+            <div>
+              <span>Longitude</span> 
+              <p>{cityWeather.coord.lon}</p>
+            </div>
+            <div>
+              <span>Latitude</span>
+              <p>{cityWeather.coord.lat}</p>
+            </div>
+            <div>
+              <span>Sunrise</span>
+              <p>{convertUTCtoDate(cityWeather.sys.sunrise)}</p>
+            </div>
+            <div>
+              <span>Sunset</span> 
+              <p>{convertUTCtoDate(cityWeather.sys.sunset)}</p>
+            </div>        
+          </div>
+
+          <div className="weather-situation">
+            <img 
+            src={`http://openweathermap.org/img/w/${cityWeather.weather[0].icon}.png`} 
+            alt="weather-icon" 
+            title={cityWeather.weather[0].description}/>
+            <p className="weather-temperature">{convertKelvinToCelcius(cityWeather.main.temp)}</p>
+            <p>{cityWeather.weather[0].main}</p>
+            <div>
+              <span>Pressure</span>
+              <p>{cityWeather.main.pressure}hPa</p>
+            </div>
+            <div>
+              <span>Humidity</span>
+              <p>{cityWeather.main.humidity}%</p> 
+            </div>
+          </div>
         </div>
       }
     </div>
