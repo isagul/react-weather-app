@@ -16,23 +16,6 @@
 			font-weight: bold;
 		}
 	}
-	
-  ul {
-		li {
-			height:40px;
-			background-color: white;
-			transition: background-color .2s ease;
-			padding-top: 10px;
-			list-style-type: none;
-			padding-left: 10px;
-			margin-right: 10px;
-			text-align: left;
-			&:hover {
-				cursor: pointer;
-				background-color: lightgray;
-			}
-		}
-	}
 	.weather-info {
 		display: flex;
 		flex-direction: column;

@@ -2,10 +2,15 @@ import React, {useState} from 'react';
 import './App.scss';
 import Downshift from 'downshift';
 import TextField from '@material-ui/core/TextField';
+import { makeStyles } from '@material-ui/core/styles';
+import Paper from '@material-ui/core/Paper';
+import MenuItem from '@material-ui/core/MenuItem';
+import deburr from 'lodash/deburr';
+
 import cityList from './assets/city.list.json';
 import axios from 'axios';
 
-const API_KEY = '890a44df0cf959052941cb2e3e122050'
+const API_KEY = '890a44df0cf959052941cb2e3e122050';
 
 function App() {
   const [cityWeather, setCityWeather] = useState({});
@@ -13,7 +18,7 @@ function App() {
 
   const convertKelvinToCelcius = kelvin => {
     return `${Math.round(kelvin - 273.15)} ${String.fromCharCode(176)}C`;    
-  }
+  };
 
   const convertUTCtoDate = utc => {
     let date = new Date(utc * 1000);
@@ -30,74 +35,163 @@ function App() {
       minutes = `${date.getMinutes()}`;
     }
     return `${hour}:${minutes}`;
-  }
- 
+  };
+
+    function renderInput(inputProps) {
+        const { InputProps, classes, ref, ...other } = inputProps;
+        return (
+            <TextField
+                InputProps={{
+                    inputRef: ref,
+                    classes: {
+                        root: classes.inputRoot,
+                        input: classes.inputInput,
+                    },
+                    ...InputProps,
+                }}
+                {...other}
+            />
+        );
+    }
+    const useStyles = makeStyles(theme => ({
+        root: {
+            flexGrow: 1,
+            height: 250,
+        },
+        container: {
+            flexGrow: 1,
+            position: 'relative',
+            padding: '10px'
+        },
+        paper: {
+            position: 'absolute',
+            zIndex: 1,
+            marginTop: theme.spacing(1),
+            left: 0,
+            right: 0,
+        },
+        chip: {
+            margin: theme.spacing(0.5, 0.25),
+        },
+        inputRoot: {
+            flexWrap: 'wrap',
+        },
+        inputInput: {
+            width: 'auto',
+            flexGrow: 1,
+        },
+        divider: {
+            height: theme.spacing(2),
+        },
+    }));
+    const classes = useStyles();
+
+    function renderSuggestion(suggestionProps) {
+        const { suggestion, index, itemProps, highlightedIndex, selectedItem } = suggestionProps;
+        const isHighlighted = highlightedIndex === index;
+        const isSelected = (selectedItem || '').indexOf(suggestion.name) > -1;
+
+        return (
+            <MenuItem
+                {...itemProps}
+                key={suggestion.id}
+                selected={isHighlighted}
+                component="div"
+                style={{
+                    fontWeight: isSelected ? 500 : 400,
+                }}
+            >
+                {suggestion.name}
+            </MenuItem>
+        );
+    }
+    function getSuggestions(value, { showEmpty = false } = {}) {
+        const inputValue = deburr(value.trim()).toLowerCase();
+        const inputLength = inputValue.length;
+        let count = 0;
+
+        return inputLength === 0 && !showEmpty
+            ? []
+            : cityList.filter(suggestion => {
+                const keep =
+                    count < 5 && suggestion.name.slice(0, inputLength).toLowerCase() === inputValue;
+
+                if (keep) {
+                    count += 1;
+                }
+
+                return keep;
+            });
+    }
   return (
     <div className="App">
       <div className="app-title">
         <img src={require('./assets/weather-icon.png')} alt="weather-icon"/>
         <h1>Weather Extension</h1>
-      </div>      
-      <Downshift
-        onChange={selection => {
-          selectedCity = selection.name
-          axios.get('http://api.openweathermap.org/data/2.5/weather', {
-          params: {
-            q: selectedCity,
-            APPID: API_KEY
-          }      
-        })
-        .then(function (response) {
-          setCityWeather(response.data);
-        })
-        .catch(function (error) {
-          console.log(error);
-        })
-        
-        }}
-        itemToString={item => (item ? item.name : '')}
-      >
-        {({
-          getInputProps,
-          getItemProps,
-          getMenuProps,
-          isOpen,
-          inputValue,
-          selectedItem,
-        }) => (
-            <div>      
-              <TextField
-                id="standard-name"
-                label="City"
-                margin="normal"
-                placeholder="Min 3 characters"
-                {...getInputProps()} 
-              />
-              <ul {...getMenuProps()}>
-                {isOpen
-                  ? cityList
-                    .filter(item => {
-                      return inputValue.length > 2 && item.name.toLowerCase().includes(inputValue.toLowerCase())
-                    })
-                    .map((item, index) => (
-                      <li
-                        {...getItemProps({
-                          key: item.id,
-                          index,
-                          item,
-                          style: {
-                            fontWeight: selectedItem === item ? 'bold' : 'normal',
-                          },
+      </div>
+        <Downshift id="downshift-simple"
+           onChange={selection => {
+               selectedCity = selection;
+               axios.get('http://api.openweathermap.org/data/2.5/weather', {
+                   params: {
+                       q: selectedCity,
+                       APPID: API_KEY
+                   }
+               })
+                   .then(function (response) {
+                       setCityWeather(response.data);
+                   })
+                   .catch(function (error) {
+                       console.log(error);
+                   })
+
+           }}
+           itemToString={item => (item ? item.name : '')}
+        >
+            {({
+                  getInputProps,
+                  getItemProps,
+                  getLabelProps,
+                  getMenuProps,
+                  highlightedIndex,
+                  inputValue,
+                  isOpen,
+                  selectedItem,
+              }) => {
+                const { onBlur, onFocus, ...inputProps } = getInputProps({
+                    placeholder: 'Search for a city name',
+                });
+
+                return (
+                    <div className={classes.container}>
+                        {renderInput({
+                            fullWidth: true,
+                            classes,
+                            label: 'City Name',
+                            InputLabelProps: getLabelProps({ shrink: true }),
+                            InputProps: { onBlur, onFocus },
+                            inputProps,
                         })}
-                      >
-                      {item.name}
-                      </li>
-                    ))
-                  : null}
-              </ul>
-            </div>
-          )}
-      </Downshift>
+
+                        <div {...getMenuProps()}>
+                            {isOpen ? (
+                                <Paper className={classes.paper} square>
+                                    {getSuggestions(inputValue).map((suggestion, index) =>
+                                        renderSuggestion({
+                                            suggestion,
+                                            index,
+                                            itemProps: getItemProps({ item: suggestion.name }),
+                                            highlightedIndex,
+                                            selectedItem,
+                                        }),
+                                    )}
+                                </Paper>
+                            ) : null}
+                        </div>
+                    </div>
+                );
+            }}
+        </Downshift>
       {
         Object.keys(cityWeather).length > 0 &&
         <div className="weather-info">
