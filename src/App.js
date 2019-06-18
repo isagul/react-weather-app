@@ -6,7 +6,6 @@ import { makeStyles } from '@material-ui/core/styles';
 import Paper from '@material-ui/core/Paper';
 import MenuItem from '@material-ui/core/MenuItem';
 import deburr from 'lodash/deburr';
-
 import cityList from './assets/city.list.json';
 import axios from 'axios';
 
@@ -16,11 +15,11 @@ function App() {
   const [cityWeather, setCityWeather] = useState({});
   let selectedCity = '';
 
-  const convertKelvinToCelcius = kelvin => {
+  function convertKelvinToCelcius(kelvin) {
     return `${Math.round(kelvin - 273.15)} ${String.fromCharCode(176)}C`;    
-  };
+  }
 
-  const convertUTCtoDate = utc => {
+  function convertUTCtoDate(utc){
     let date = new Date(utc * 1000);
     let hour = '';
     let minutes = '';
@@ -35,94 +34,97 @@ function App() {
       minutes = `${date.getMinutes()}`;
     }
     return `${hour}:${minutes}`;
-  };
+  }
 
-    function renderInput(inputProps) {
-        const { InputProps, classes, ref, ...other } = inputProps;
-        return (
-            <TextField
-                InputProps={{
-                    inputRef: ref,
-                    classes: {
-                        root: classes.inputRoot,
-                        input: classes.inputInput,
-                    },
-                    ...InputProps,
-                }}
-                {...other}
-            />
-        );
-    }
-    const useStyles = makeStyles(theme => ({
-        root: {
-            flexGrow: 1,
-            height: 250,
-        },
-        container: {
-            flexGrow: 1,
-            position: 'relative',
-            padding: '10px'
-        },
-        paper: {
-            position: 'absolute',
-            zIndex: 1,
-            marginTop: theme.spacing(1),
-            left: 0,
-            right: 0,
-        },
-        chip: {
-            margin: theme.spacing(0.5, 0.25),
-        },
-        inputRoot: {
-            flexWrap: 'wrap',
-        },
-        inputInput: {
-            width: 'auto',
-            flexGrow: 1,
-        },
-        divider: {
-            height: theme.spacing(2),
-        },
+  function renderInput(inputProps) {
+      const { InputProps, classes, ref, ...other } = inputProps;
+      return (
+          <TextField
+              InputProps={{
+                  inputRef: ref,
+                  classes: {
+                      root: classes.inputRoot,
+                      input: classes.inputInput,
+                  },
+                  ...InputProps,
+              }}
+              {...other}
+          />
+      );
+  }
+    
+  const useStyles = makeStyles(theme => ({
+      root: {
+          flexGrow: 1,
+          height: 250,
+      },
+      container: {
+          flexGrow: 1,
+          position: 'relative',
+          padding: '10px'
+      },
+      paper: {
+          position: 'absolute',
+          zIndex: 1,
+          marginTop: theme.spacing(1),
+          left: 0,
+          right: 0,
+      },
+      chip: {
+          margin: theme.spacing(0.5, 0.25),
+      },
+      inputRoot: {
+          flexWrap: 'wrap',
+      },
+      inputInput: {
+          width: 'auto',
+          flexGrow: 1,
+      },
+      divider: {
+          height: theme.spacing(2),
+      },
     }));
+
     const classes = useStyles();
 
     function renderSuggestion(suggestionProps) {
-        const { suggestion, index, itemProps, highlightedIndex, selectedItem } = suggestionProps;
-        const isHighlighted = highlightedIndex === index;
-        const isSelected = (selectedItem || '').indexOf(suggestion.name) > -1;
+      const { suggestion, index, itemProps, highlightedIndex, selectedItem } = suggestionProps;
+      const isHighlighted = highlightedIndex === index;
+      const isSelected = (selectedItem || '').indexOf(suggestion.name) > -1;
 
-        return (
-            <MenuItem
-                {...itemProps}
-                key={suggestion.id}
-                selected={isHighlighted}
-                component="div"
-                style={{
-                    fontWeight: isSelected ? 500 : 400,
-                }}
-            >
-                {suggestion.name}
-            </MenuItem>
-        );
+      return (
+          <MenuItem
+              {...itemProps}
+              key={suggestion.id}
+              selected={isHighlighted}
+              component="div"
+              style={{
+                  fontWeight: isSelected ? 500 : 400,
+              }}
+          >
+            {suggestion.name}
+          </MenuItem>
+      );
     }
     function getSuggestions(value, { showEmpty = false } = {}) {
-        const inputValue = deburr(value.trim()).toLowerCase();
-        const inputLength = inputValue.length;
-        let count = 0;
+      const inputValue = deburr(value.trim()).toLowerCase();
+      const inputLength = inputValue.length;
+      let count = 0;
 
-        return inputLength === 0 && !showEmpty
-            ? []
-            : cityList.filter(suggestion => {
-                const keep =
-                    count < 5 && suggestion.name.slice(0, inputLength).toLowerCase() === inputValue;
+      return inputLength === 0 && !showEmpty
+          ? []
+          : cityList.filter(suggestion => {
+              const keep =
+                  count < 5 && suggestion.name.slice(0, inputLength).toLowerCase() === inputValue;
 
-                if (keep) {
-                    count += 1;
-                }
+              if (keep) {
+                  count += 1;
+              }
 
-                return keep;
-            });
+              return keep;
+          });
     }
+
   return (
     <div className="App">
       <div className="app-title">
@@ -170,22 +172,22 @@ function App() {
                             label: 'City Name',
                             InputLabelProps: getLabelProps({ shrink: true }),
                             InputProps: { onBlur, onFocus },
-                            inputProps,
+                            inputProps
                         })}
 
                         <div {...getMenuProps()}>
                             {isOpen ? (
-                                <Paper className={classes.paper} square>
-                                    {getSuggestions(inputValue).map((suggestion, index) =>
-                                        renderSuggestion({
-                                            suggestion,
-                                            index,
-                                            itemProps: getItemProps({ item: suggestion.name }),
-                                            highlightedIndex,
-                                            selectedItem,
-                                        }),
-                                    )}
-                                </Paper>
+                              <Paper className={classes.paper} square>
+                                  {getSuggestions(inputValue).map((suggestion, index) =>
+                                      renderSuggestion({
+                                          suggestion,
+                                          index,
+                                          itemProps: getItemProps({ item: suggestion.name }),
+                                          highlightedIndex,
+                                          selectedItem,
+                                      }),
+                                  )}
+                              </Paper>
                             ) : null}
                         </div>
                     </div>
@@ -195,6 +197,7 @@ function App() {
       {
         Object.keys(cityWeather).length > 0 &&
         <div className="weather-info">
+          <h3 className='city-name'>{cityWeather.name}</h3>
           <div className="weather-main">
             <div>
               <span>Longitude</span> 
