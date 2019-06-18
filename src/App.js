@@ -40,6 +40,7 @@ function App() {
       const { InputProps, classes, ref, ...other } = inputProps;
       return (
           <TextField
+              autoFocus
               InputProps={{
                   inputRef: ref,
                   classes: {
@@ -129,7 +130,10 @@ function App() {
     <div className="App">
       <div className="app-title">
         <img src={require('./assets/weather-icon.png')} alt="weather-icon"/>
-        <h1>Weather Extension</h1>
+        <div>
+          <h1>Weather Extension</h1>
+          <p>Learn quickly weather of city where you live in.</p>            
+        </div>        
       </div>
         <Downshift id="downshift-simple"
            onChange={selection => {
