@@ -1,0 +1,19 @@
+{
+  "short_name": "Weather Extension",
+  "name": "React Weather Extension",
+  "manifest_version": 2,
+  "author": "Isa Gul",
+  "version": "0.0.1",
+  "description": "Learn weather of city where you live in.",
+  "browser_action": {
+    "default_popup": "index.html",
+    "default_title": "Weather Extension"
+  },
+  "icons": {
+    "128": "weather-icon.png" 
+  },
+  "start_url": "index.html",
+  "display": "standalone",
+  "theme_color": "#000000",
+  "background_color": "#ffffff"
+}
