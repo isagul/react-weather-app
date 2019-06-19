@@ -9,7 +9,7 @@ import deburr from 'lodash/deburr';
 import cityList from './assets/city.list.json';
 import axios from 'axios';
 
-const API_KEY = '890a44df0cf959052941cb2e3e122050';
+const API_KEY = '';
 
 function App() {
   const [cityWeather, setCityWeather] = useState({});
